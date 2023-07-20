@@ -1,0 +1,10 @@
+.star:hover{
+    fill:yellow;
+    cursor: pointer;
+}
+
+.star.active{
+    fill: yellow;
+}
+
+
