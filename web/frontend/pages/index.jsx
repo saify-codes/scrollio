@@ -52,7 +52,6 @@ export default function HomePage() {
     console.log(status);
     setStatus(!status);
   };
-
   return (
     <Page fullWidth>
       <Layout>

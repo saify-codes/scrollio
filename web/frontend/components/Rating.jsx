@@ -1,25 +1,42 @@
+import CustomModal from './Model';
 import './Rating.css'
-import { Box, Text, Divider, Icon, HorizontalStack } from "@shopify/polaris";
+import { Box, Text, Divider, HorizontalStack } from "@shopify/polaris";
+import { useContext, useEffect, useState } from 'react';
+import ModalContext from '../components/providers/Model'
+import RatingContext from '../components/providers/Rating'
+import PopupContext from '../components/providers/Popup'
+import Popup from './Popup';
 
 export default function Rating() {
+    const state = useState(false) // state for managing modal
+    const popup = useState(false) // state for managing modal
+    const ratings = useState(null) // state for managing ratings e.g 1,2,3,4,5 star
+    useEffect(() => {
+        loadRatings()
+    }, [])
     return (
         <Box padding="5" background="bg-success" borderRadius="1">
             <HorizontalStack>
                 <Text variant="bodyLg" fontWeight="semibold" as="p">
                     <ChatIcon /> Would you mind letting us know what you think about Scrollio?
                 </Text>
-                <Stars />
+                <ModalContext.Provider value={state}>
+                    <RatingContext.Provider value={ratings}>
+                        <PopupContext.Provider value={popup}>
+                            <Stars />
+                            <CustomModal />
+                            <Popup />
+                        </PopupContext.Provider>
+                    </RatingContext.Provider>
+                </ModalContext.Provider>
             </HorizontalStack>
             <Divider borderWidth="5" borderColor="transparent" />
             <Text variant='bodySm'>
                 This business literally survives on reviews, and each <strong>positive review</strong> helps us maintain focus on keeping the app <strong>stable</strong> and <strong>affordable</strong>.
             </Text>
-
         </Box>
     );
 }
-
-
 
 function ChatIcon() {
     return <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeWidth={2} fill='none' stroke="#1f2124" height={18} style={{ verticalAlign: 'bottom' }}>
@@ -43,28 +60,75 @@ function Stars() {
     </>
 }
 
-
 function Star({ index }) {
-    const handler = (e) => {
-        const index = e.target.dataset.index
-        if (e.type == "mouseenter") {
-            for (let i = 1; i < index; i++) {
-                document.querySelector(`.star[data-index="${i}"]`).classList.add('active')
-            }
-        } else if (e.type == "mouseleave") {
-            for (let i = 1; i < index; i++) {
-                document.querySelector(`.star[data-index="${i}"]`).classList.remove('active')
-            }
-        } else if (e.type == "click") {
-            for (let i = 1; i <= index; i++) {
-                // document.querySelector(`.star[data-index="${i}"]`).classList.add('active')
-            }
+    const [, setActive] = useContext(ModalContext)
+    const [, setRating] = useContext(RatingContext)
+    const [, setActivePopup] = useContext(PopupContext)
+    const test = (index) => {
+        setRating(index)
+        if (index <= 3) {
+            setActive(true)
+            const speech = new SpeechSynthesisUtterance()
+            speech.text = "Please provide us feedback"
+            speechSynthesis.speak(speech)
+        } else {
+            setActivePopup(true)
+            highlighterActive(index)
         }
     }
 
+    const handleMouseEnter = (index) => {
+        highlighter(index)
+    }
+
+    const handleMouseLeave = (index) => {
+        highlighter(index, false)
+    }
+
     return <>
-        <svg onMouseEnter={handler} onClick={handler} onMouseLeave={handler} data-index={index} className='star' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="yellow" width={20} height={20}>
-            <path data-index={index} strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+        <svg onMouseEnter={() => handleMouseEnter(index)} onMouseLeave={() => handleMouseLeave(index)} onClick={() => test(index)} className='star' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="yellow" width={20} height={20}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
         </svg>
     </>
+}
+
+function loadRatings() {
+    const ratings = window.localStorage.getItem('feedback')
+    if (ratings) {
+        const stars = document.querySelectorAll('.star')
+        const count = ratings;
+        // Higlighting stars
+        for (let i = 0; i < count; i++) {
+            stars[i].classList.add('active')
+        }
+    }
+}
+
+// Function to highlight or mark stars
+function highlighter(count, highlight = true) {
+    const stars = document.querySelectorAll('.star')
+
+    // Higlighting or removing stars highlight
+    for (let i = 0; i < count; i++) {
+        if (highlight) stars[i].classList.add('highlight')
+        else stars[i].classList.remove('highlight')
+
+    }
+}
+
+// Function to highlight or mark stars permenantly
+function highlighterActive(count) {
+    // Targeting all stars
+    const stars = document.querySelectorAll('.star')
+
+    // Removing existing stars
+    for (const star of stars)
+        star.classList.remove('active')
+
+    // Higlighting stars
+    for (let i = 0; i < count; i++) {
+        stars[i].classList.add('active')
+    }
+
+    window.localStorage.setItem('feedback', count)
 }

@@ -1,9 +1,7 @@
-.star:hover{
-    fill:yellow;
+.star{
     cursor: pointer;
 }
-
-.star.active{
+.star:is(.active,.highlight){
     fill: yellow;
 }
 

@@ -3,6 +3,8 @@ import { shopifyApp } from "@shopify/shopify-app-express";
 // import { SQLiteSessionStorage } from "@shopify/shopify-app-session-storage-sqlite"; // not using
 import {MySQLSessionStorage} from '@shopify/shopify-app-session-storage-mysql';
 import { restResources } from "@shopify/shopify-api/rest/admin/2023-04";
+import dotenv from 'dotenv'
+dotenv.config()
 
 // const DB_PATH = `${process.cwd()}/database.sqlite`;
 
@@ -18,6 +20,8 @@ const billingConfig = {
 };
 const shopify = shopifyApp({
   api: {
+    apiKey: process.env.SHOPIFY_API_KEY,
+    apiSecretKey: process.env.SHOPIFY_SECRET_KEY,
     apiVersion: LATEST_API_VERSION,
     restResources,
     billing: undefined, // or replace with billingConfig above to enable example billing
@@ -31,8 +35,11 @@ const shopify = shopifyApp({
   },
   // This should be replaced with your preferred storage strategy
   // sessionStorage: new SQLiteSessionStorage(DB_PATH),
-  sessionStorage:  new MySQLSessionStorage(
-    'mysql://root@localhost/shopify',
+  sessionStorage:  MySQLSessionStorage.withCredentials(
+    process.env.DB_HOST,
+    process.env.DB,
+    process.env.DB_USER,
+    process.env.DB_PASSWORD
   ),
 });
 
