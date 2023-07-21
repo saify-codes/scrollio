@@ -1,0 +1,8 @@
+.star{
+    cursor: pointer;
+}
+.star:is(.active,.highlight){
+    fill: yellow;
+}
+
+

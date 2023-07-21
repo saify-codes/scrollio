@@ -1,0 +1,26 @@
+{
+  "name": "scrollify",
+  "version": "1.0.0",
+  "main": "web/index.js",
+  "license": "UNLICENSED",
+  "scripts": {
+    "shopify": "shopify",
+    "build": "shopify app build",
+    "dev": "shopify app dev",
+    "info": "shopify app info",
+    "generate": "shopify app generate",
+    "deploy": "shopify app deploy"
+  },
+  "dependencies": {
+    "@shopify/app": "3.47.5",
+    "@shopify/cli": "3.47.5",
+    "@shopify/shopify-app-session-storage-mysql": "^1.1.9"
+  },
+  "author": "wd_frontend",
+  "private": true,
+  "workspaces": [
+    "web",
+    "web/frontend",
+    "extensions/*"
+  ]
+}
