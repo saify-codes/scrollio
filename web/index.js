@@ -7,6 +7,8 @@ import serveStatic from "serve-static";
 import shopify from "./shopify.js";
 import productCreator from "./product-creator.js";
 import GDPRWebhookHandlers from "./gdpr.js";
+import { insertData, getStyles } from "./db.js";
+
 
 const PORT = parseInt(
   process.env.BACKEND_PORT || process.env.PORT || "3000",
@@ -32,12 +34,50 @@ app.post(
   shopify.processWebhooks({ webhookHandlers: GDPRWebhookHandlers })
 );
 
+app.get("/api/getStyle", (req, res) => {
+  getStyles((a, b) => {
+    res.json(b);
+  });
+});
+
+app.get("/api/getProducts", async (req, res) => {
+  
+  res.status(200).send('countData');
+});
+
 // If you are adding routes outside of the /api path, remember to
 // also add a proxy rule for them in web/frontend/vite.config.js
-
 app.use("/api/*", shopify.validateAuthenticatedSession());
 
 app.use(express.json());
+
+// here
+app.post("/api/hello", async (req, res) => {
+  console.log("=============>", req.body);
+  const {
+    bordersize,
+    bordercolor,
+    borderradius,
+    backgroundcolor,
+    fontsize,
+    fontcolor,
+    font,
+    fontstyle,
+    buttontext,
+  } = req.body;
+  insertData(
+    bordersize,
+    bordercolor,
+    borderradius,
+    backgroundcolor,
+    fontsize,
+    fontcolor,
+    font,
+    fontstyle,
+    buttontext
+  );
+  res.send("Hello hasnain");
+});
 
 app.get("/api/products/count", async (_req, res) => {
   const countData = await shopify.api.rest.Product.count({
@@ -68,6 +108,10 @@ app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res, _next) => {
     .status(200)
     .set("Content-Type", "text/html")
     .send(readFileSync(join(STATIC_PATH, "index.html")));
+});
+
+app.get("/api/test", (req, res) => {
+  res.send("Hello world!");
 });
 
 app.listen(PORT);

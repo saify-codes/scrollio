@@ -11,7 +11,10 @@ import {
   FormLayout,
   TextField,
   Select,
+  Toast,
+  Frame
 } from "@shopify/polaris";
+import {useAuthenticatedFetch} from '../hooks/useAuthenticatedFetch'
 import { ExternalMinor } from "@shopify/polaris-icons";
 import { useState } from "react";
 import Rating from "../components/Rating";
@@ -28,6 +31,7 @@ const fontStyles = [
 ];
 
 export default function HomePage() {
+  const [active, setActive] = useState(true);
   const [status, setStatus] = useState(true);
   const [font, setFont] = useState("cursive");
   const [fontstyle, setFontStyle] = useState("normal");
@@ -38,6 +42,7 @@ export default function HomePage() {
   const [fontsize, setFontSize] = useState(18);
   const [fontcolor, setFontColor] = useState("#FF0000");
   const [buttontext, setButtonText] = useState("Loading...");
+  const authenticatedFetch = useAuthenticatedFetch()
 
   const handleSelectFontFamily = (value) => setFont(value);
   const handleSelectFontStyle = (value) => setFontStyle(value);
@@ -48,6 +53,23 @@ export default function HomePage() {
   const handleSetBorderRadius = (value) => setBorderRadius(value);
   const handleSetBorderColor = (value) => setBorderColor(value);
   const handleSetBorderSize = (value) => setBorderSize(value);
+  
+  // Toasts
+  // ---
+  
+  const saveData = async () => {
+    const styles = { bordersize, bordercolor, borderradius, backgroundcolor, fontsize, fontcolor, font, fontstyle, buttontext}
+    const data = await authenticatedFetch("/api/hello",{
+      headers:{
+        'Content-Type':'application/json'
+      },
+      method:'POST',
+      body:JSON.stringify(styles)
+    })
+    console.log(data);
+    console.log(await data.text());
+    alert("Saved!")
+  }
   const handleSetStaus = () => {
     console.log(status);
     setStatus(!status);
@@ -237,9 +259,7 @@ export default function HomePage() {
 
                     {/* save changes */}
                     <HorizontalStack align="end">
-                      <Button loading={false} primary>
-                        Save
-                      </Button>
+                      <Button loading={false} primary onClick={saveData}>Save</Button>
                     </HorizontalStack>
                   </VerticalStack>
                 </LegacyCard>
